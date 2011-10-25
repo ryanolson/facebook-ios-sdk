@@ -100,20 +100,6 @@ static NSString* kSDKVersion = @"2";
   return self;
 }
 
-/**
- * Override NSObject : free the space
- */
-- (void)dealloc {
-  [_accessToken release];
-  [_expirationDate release];
-  [_request release];
-  [_loginDialog release];
-  [_fbDialog release];
-  [_appId release];
-  [_permissions release];
-  [_urlSchemeSuffix release];
-  [super dealloc];
-}
 
 /**
  * A private helper function for sending HTTP requests.
@@ -140,11 +126,10 @@ static NSString* kSDKVersion = @"2";
     [params setValue:self.accessToken forKey:@"access_token"];
   }
 
-  [_request release];
-  _request = [[FBRequest getRequestWithParams:params
+  _request = [FBRequest getRequestWithParams:params
                                    httpMethod:httpMethod
                                      delegate:delegate
-                                   requestURL:url] retain];
+                                   requestURL:url];
   [_request connect];
   return _request;
 }
@@ -214,7 +199,6 @@ static NSString* kSDKVersion = @"2";
   // If single sign-on failed, open an inline login dialog. This will require the user to
   // enter his or her credentials.
   if (!didOpenOtherApp) {
-    [_loginDialog release];
     _loginDialog = [[FBLoginDialog alloc] initWithURL:loginDialogURL
                                           loginParams:params
                                              delegate:self];
@@ -227,7 +211,7 @@ static NSString* kSDKVersion = @"2";
  */
 - (NSDictionary*)parseURLParams:(NSString *)query {
 	NSArray *pairs = [query componentsSeparatedByString:@"&"];
-	NSMutableDictionary *params = [[[NSMutableDictionary alloc] init] autorelease];
+	NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
 	for (NSString *pair in pairs) {
 		NSArray *kv = [pair componentsSeparatedByString:@"="];
 		NSString *val =
@@ -373,9 +357,7 @@ static NSString* kSDKVersion = @"2";
 - (void)logout:(id<FBSessionDelegate>)delegate {
 
   self.sessionDelegate = delegate;
-  [_accessToken release];
   _accessToken = nil;
-  [_expirationDate release];
   _expirationDate = nil;
 
   NSHTTPCookieStorage* cookies = [NSHTTPCookieStorage sharedHTTPCookieStorage];
@@ -584,8 +566,6 @@ static NSString* kSDKVersion = @"2";
 - (void)dialog:(NSString *)action
      andParams:(NSMutableDictionary *)params
    andDelegate:(id <FBDialogDelegate>)delegate {
-
-  [_fbDialog release];
 
   NSString *dialogURL = [kDialogBaseURL stringByAppendingString:action];
   [params setObject:@"touch" forKey:@"display"];
