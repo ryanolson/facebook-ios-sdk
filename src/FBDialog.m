@@ -31,17 +31,6 @@ static CGFloat kBorderWidth = 10;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-BOOL FBIsDeviceIPad() {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 30200
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        return YES;
-    }
-#endif
-    return NO;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////
-
 @implementation FBDialog
 
 @synthesize delegate = _delegate,
@@ -49,6 +38,15 @@ params   = _params;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // private
+
+-(BOOL) FBIsDeviceIPad {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 30200
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        return YES;
+    }
+#endif
+    return NO;
+}
 
 - (void)addRoundedRectToPath:(CGContextRef)context rect:(CGRect)rect radius:(float)radius {
     CGContextBeginPath(context);
@@ -164,7 +162,7 @@ params   = _params;
                                  frame.origin.y + ceil(frame.size.height/2));
     
     CGFloat scale_factor = 1.0f;
-    if (FBIsDeviceIPad()) {
+    if ([self FBIsDeviceIPad]) {
         // On the iPad the dialog's dimensions should only be 60% of the screen's
         scale_factor = 0.6f;
     }
@@ -406,7 +404,7 @@ params   = _params;
 // UIDeviceOrientationDidChangeNotification
 
 - (void)deviceOrientationDidChange:(void*)object {
-    UIDeviceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+    NSInteger orientation = [UIApplication sharedApplication].statusBarOrientation;
     if (!_showingKeyboard && [self shouldRotateToOrientation:orientation]) {
         [self updateWebOrientation];
         
@@ -425,7 +423,7 @@ params   = _params;
     
     _showingKeyboard = YES;
     
-    if (FBIsDeviceIPad()) {
+    if ([self FBIsDeviceIPad]) {
         // On the iPad the screen is large enough that we don't need to
         // resize the dialog to accomodate the keyboard popping up
         return;
@@ -442,7 +440,7 @@ params   = _params;
 - (void)keyboardWillHide:(NSNotification*)notification {
     _showingKeyboard = NO;
     
-    if (FBIsDeviceIPad()) {
+    if ([self FBIsDeviceIPad]) {
         return;
     }
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
